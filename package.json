@@ -1,0 +1,28 @@
+{
+  "name": "portfolio-ngoma-fils",
+  "version": "1.0.0",
+  "description": "Portfolio professionnel de NGOMA FILS - Développeur Full Stack",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s . -l 3000",
+    "build": "echo 'No build process needed for static site'",
+    "deploy": "npm run build"
+  },
+  "keywords": [
+    "portfolio",
+    "développeur",
+    "fullstack",
+    "javascript",
+    "html",
+    "css"
+  ],
+  "author": "NGOMA FILS",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GlobalDev2025/fils-ngoma.git"
+  }
+}

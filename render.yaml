@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: portfolio-ngoma-fils
+    env: static
+    buildCommand: ""
+    startCommand: "npx serve -s -l 3000"
+    publish: "."
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache

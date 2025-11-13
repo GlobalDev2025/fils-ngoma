@@ -1,0 +1,141 @@
+// Initialisation d'EmailJS avec votre clé
+        (function() {
+            emailjs.init("votre_cle_publique_emailjs_ici"); // Remplacez par votre clé publique
+        })();
+
+        // Navigation mobile
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // Fermer le menu mobile en cliquant sur un lien
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+        
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            
+            // Scroll to top button
+            const scrollToTopBtn = document.querySelector('.scroll-to-top');
+            if (scrollTop > 300) {
+                scrollToTopBtn.classList.add('active');
+            } else {
+                scrollToTopBtn.classList.remove('active');
+            }
+        });
+        
+        // Scroll to top functionality
+        document.querySelector('.scroll-to-top').addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // Téléchargement du CV
+        document.getElementById('downloadCV').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Créer un lien de téléchargement pour le CV
+            const link = document.createElement('a');
+            link.href = 'CV_NGOMA_Fils.pdf'; // Remplacez par le chemin réel de votre CV
+            link.download = 'CV_NGOMA_Fils.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Message de confirmation
+            alert('Votre CV est en cours de téléchargement!');
+        });
+        
+        // Formulaire de contact avec EmailJS
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('formSpinner');
+            const messageDiv = document.getElementById('formMessage');
+            
+            // Récupérer les valeurs du formulaire
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            
+            // Afficher le spinner et désactiver le bouton
+            submitBtn.disabled = true;
+            spinner.style.display = 'block';
+            messageDiv.style.display = 'none';
+            
+            // Préparer les paramètres pour EmailJS
+            const templateParams = {
+                from_name: name,
+                from_email: email,
+                subject: subject,
+                message: message,
+                to_email: 'filsngoma475@gmail.com'
+            };
+            
+            // Envoyer l'email via EmailJS
+            emailjs.send('service_k9kr4ed', 'template_k8nyvl9', templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
+                    
+                    // Afficher le message de succès
+                    messageDiv.textContent = 'Message envoyé avec succès! Je vous répondrai dès que possible.';
+                    messageDiv.className = 'form-message success';
+                    messageDiv.style.display = 'block';
+                    
+                    // Réinitialiser le formulaire
+                    document.getElementById('contactForm').reset();
+                }, function(error) {
+                    console.log('FAILED...', error);
+                    
+                    // Afficher le message d'erreur
+                    messageDiv.textContent = 'Erreur lors de l\'envoi du message. Veuillez réessayer ou me contacter directement par email.';
+                    messageDiv.className = 'form-message error';
+                    messageDiv.style.display = 'block';
+                })
+                .finally(function() {
+                    // Réactiver le bouton et cacher le spinner
+                    submitBtn.disabled = false;
+                    spinner.style.display = 'none';
+                });
+        });
+        
+        // Animation des éléments au défilement
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 1s ease forwards';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        // Observer les éléments à animer
+        document.querySelectorAll('.timeline-item, .skill-category, .about-text, .about-image').forEach(el => {
+            el.style.opacity = '0';
+            observer.observe(el);
+        });

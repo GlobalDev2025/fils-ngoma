@@ -1,6 +1,6 @@
 // Initialisation d'EmailJS avec votre clé
         (function() {
-            emailjs.init("votre_cle_publique_emailjs_ici"); // Remplacez par votre clé publique
+            emailjs.init("_ZXoqWAuSvrItSXKP"); // Remplacez par votre clé publique
         })();
 
         // Navigation mobile
@@ -93,7 +93,7 @@
             };
             
             // Envoyer l'email via EmailJS
-            emailjs.send('service_k9kr4ed', 'template_k8nyvl9', templateParams)
+            emailjs.send('service_k9kr4ed', 'template_5tmeqth', templateParams)
                 .then(function(response) {
                     console.log('SUCCESS!', response.status, response.text);
                     

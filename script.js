@@ -1,6 +1,8 @@
 // Initialisation d'EmailJS avec votre clé
 (function() {
+    console.log('Initialisation EmailJS avec la clé:', '_ZXoqWAuSvrItSXKP');
     emailjs.init("_ZXoqWAuSvrItSXKP");
+    console.log('EmailJS initialisé');
 })();
 
 // Navigation mobile
@@ -64,7 +66,68 @@ document.getElementById('downloadCV').addEventListener('click', function(e) {
     alert('Votre CV est en cours de téléchargement!');
 });
 
-// Formulaire de contact avec EmailJS
+// Fonction pour envoyer avec EmailJS
+function sendEmailWithEmailJS(formData) {
+    const submitBtn = document.getElementById('submitBtn');
+    const spinner = document.getElementById('formSpinner');
+    const messageDiv = document.getElementById('formMessage');
+    
+    // Afficher le spinner et désactiver le bouton
+    submitBtn.disabled = true;
+    spinner.style.display = 'block';
+    messageDiv.style.display = 'none';
+    
+    const { name, email, subject, message } = formData;
+    
+    // Préparer les paramètres pour EmailJS
+    const templateParams = {
+        from_name: name,
+        from_email: email,
+        subject: subject,
+        message: message,
+        to_email: 'filsngoma475@gmail.com',
+        reply_to: email,
+        date: new Date().toLocaleString('fr-FR')
+    };
+    
+    console.log('Tentative d\'envoi avec EmailJS:', templateParams);
+    
+    // Envoyer l'email via EmailJS
+    return emailjs.send('service_k9kr4ed', 'template_5tmeqth', templateParams)
+        .then(function(response) {
+            console.log('SUCCESS EmailJS!', response);
+            
+            // Afficher le message de succès
+            messageDiv.textContent = '✅ Message envoyé avec succès! Je vous répondrai dans les plus brefs délais.';
+            messageDiv.className = 'form-message success';
+            messageDiv.style.display = 'block';
+            
+            // Réinitialiser le formulaire
+            document.getElementById('contactForm').reset();
+            return true;
+        }, function(error) {
+            console.log('FAILED EmailJS...', error);
+            return false;
+        })
+        .finally(function() {
+            // Réactiver le bouton et cacher le spinner
+            submitBtn.disabled = false;
+            spinner.style.display = 'none';
+        });
+}
+
+// Solution de secours - Redirection mailto
+function sendEmailFallback(formData) {
+    const { name, email, subject, message } = formData;
+    
+    const body = `Nom: ${name}%0AEmail: ${email}%0A%0AMessage:%0A${message}`;
+    const mailtoLink = `mailto:filsngoma475@gmail.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+    
+    window.open(mailtoLink, '_blank');
+    return true;
+}
+
+// Modifier la fonction d'envoi pour inclure la solution de secours
 document.getElementById('contactForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -73,13 +136,15 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
     const messageDiv = document.getElementById('formMessage');
     
     // Récupérer les valeurs du formulaire
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const subject = document.getElementById('subject').value;
-    const message = document.getElementById('message').value;
+    const formData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value, 
+        subject: document.getElementById('subject').value,
+        message: document.getElementById('message').value
+    };
     
     // Validation des champs
-    if (!name || !email || !subject || !message) {
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
         messageDiv.textContent = 'Veuillez remplir tous les champs obligatoires.';
         messageDiv.className = 'form-message error';
         messageDiv.style.display = 'block';
@@ -88,7 +153,7 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
     
     // Validation email basique
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(formData.email)) {
         messageDiv.textContent = 'Veuillez entrer une adresse email valide.';
         messageDiv.className = 'form-message error';
         messageDiv.style.display = 'block';
@@ -100,54 +165,40 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
     spinner.style.display = 'block';
     messageDiv.style.display = 'none';
     
-    // Préparer les paramètres pour EmailJS
-    const templateParams = {
-        from_name: name,
-        from_email: email,
-        subject: `Portfolio: ${subject}`,
-        message: message,
-        to_email: 'filsngoma475@gmail.com',
-        date: new Date().toLocaleString('fr-FR')
-    };
+    console.log('Tentative d\'envoi du formulaire...');
     
-    console.log('Envoi du message en cours...', templateParams);
-    
-    // Envoyer l'email via EmailJS
-    emailjs.send('service_k9kr4ed', 'template_5tmeqth', templateParams)
-        .then(function(response) {
-            console.log('SUCCESS!', response.status, response.text);
-            
-            // Afficher le message de succès
-            messageDiv.textContent = '✅ Message envoyé avec succès! Je vous répondrai dans les plus brefs délais.';
+    // Essayer d'abord EmailJS, puis solution de secours
+    sendEmailWithEmailJS(formData)
+        .then(success => {
+            if (!success) {
+                console.log('EmailJS a échoué, utilisation de la solution de secours...');
+                // Afficher un message informatif
+                messageDiv.textContent = 'Ouverture de votre client email... Veuillez envoyer le message pré-rempli.';
+                messageDiv.className = 'form-message success';
+                messageDiv.style.display = 'block';
+                
+                // Utiliser la solution de secours
+                sendEmailFallback(formData);
+                
+                // Réinitialiser le formulaire après un délai
+                setTimeout(() => {
+                    document.getElementById('contactForm').reset();
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            console.log('Erreur lors de l\'envoi:', error);
+            // En cas d'erreur, utiliser directement la solution de secours
+            messageDiv.textContent = 'Ouverture de votre client email... Veuillez envoyer le message pré-rempli.';
             messageDiv.className = 'form-message success';
             messageDiv.style.display = 'block';
             
-            // Réinitialiser le formulaire
-            document.getElementById('contactForm').reset();
-        }, function(error) {
-            console.log('FAILED...', error);
+            sendEmailFallback(formData);
             
-            // Message d'erreur détaillé
-            let errorMessage = 'Erreur lors de l\'envoi du message. ';
-            
-            if (error.text) {
-                if (error.text.includes('User')) {
-                    errorMessage += 'Problème d\'authentification EmailJS. ';
-                } else if (error.text.includes('Template')) {
-                    errorMessage += 'Template EmailJS introuvable. ';
-                }
-            }
-            
-            errorMessage += 'Veuillez réessayer ou me contacter directement à filsngoma475@gmail.com';
-            
-            messageDiv.textContent = errorMessage;
-            messageDiv.className = 'form-message error';
-            messageDiv.style.display = 'block';
-        })
-        .finally(function() {
-            // Réactiver le bouton et cacher le spinner
-            submitBtn.disabled = false;
-            spinner.style.display = 'none';
+            // Réinitialiser le formulaire après un délai
+            setTimeout(() => {
+                document.getElementById('contactForm').reset();
+            }, 2000);
         });
 });
 
@@ -167,21 +218,17 @@ const observer = new IntersectionObserver((entries) => {
 }, observerOptions);
 
 // Observer les éléments à animer
-document.querySelectorAll('.timeline-item, .skill-category, .about-text, .about-image, .resource-card').forEach(el => {
+document.querySelectorAll('.timeline-item, .skill-category, .about-text, .about-image').forEach(el => {
     el.style.opacity = '0';
     observer.observe(el);
 });
 
-// Gestion des erreurs globales
-window.addEventListener('error', function(e) {
-    console.error('Erreur JavaScript:', e.error);
-});
-
-// Vérification que EmailJS est chargé
+// Test EmailJS au chargement
 document.addEventListener('DOMContentLoaded', function() {
-    if (typeof emailjs === 'undefined') {
-        console.error('EmailJS non chargé! Vérifiez le script dans le HTML.');
-    } else {
-        console.log('EmailJS chargé avec succès');
-    }
+    console.log('=== TEST EmailJS ===');
+    console.log('Service ID: service_k9kr4ed');
+    console.log('Template ID: template_5tmeqth');
+    console.log('Public Key: _ZXoqWAuSvrItSXKP');
+    console.log('EmailJS object:', emailjs);
+    console.log('====================');
 });
